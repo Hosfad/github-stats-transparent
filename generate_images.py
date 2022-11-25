@@ -39,7 +39,7 @@ async def generate_overview(s: Stats) -> None:
     output = re.sub("{{ contributions }}", f"{await s.total_contributions:,}",
                     output)
     changed = (await s.lines_changed)[0] + (await s.lines_changed)[1]
-    output = re.sub("{{ lines_changed }}", f"{changed:,}", output)
+    output = re.sub("{{ lines_changed }}", f"{human_format(changed)}", output)
     output = re.sub("{{ views }}", f"{await s.views:,}", output)
     output = re.sub("{{ repos }}", f"{len(await s.all_repos):,}", output)
 
@@ -47,7 +47,13 @@ async def generate_overview(s: Stats) -> None:
     with open("generated/overview.svg", "w") as f:
         f.write(output)
 
-
+def human_format(num):
+    num = float('{:.3g}'.format(num))
+    magnitude = 0
+    while abs(num) >= 1000:
+        magnitude += 1
+        num /= 1000.0
+    return '{}{}'.format('{:f}'.format(num).rstrip('0').rstrip('.'), ['', 'k', 'm', 'b', 't'][magnitude])
 async def generate_languages(s: Stats) -> None:
     """
     Generate an SVG badge with summary languages used
